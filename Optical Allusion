@@ -1,0 +1,68 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class OpticalIllusion extends JPanel implements ActionListener {
+
+    private final int WIDTH = 800;
+    private final int HEIGHT = 600;
+    private final int RINGS = 12;
+    private final int RADIUS_STEP = 20;
+    private double rotation = 0;
+    private javax.swing.Timer timer;
+
+    public OpticalIllusion() {
+        setPreferredSize(new Dimension(WIDTH, HEIGHT));
+        setBackground(Color.WHITE);
+        timer = new javax.swing.Timer(16, this); // ~60 FPS
+        timer.start();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        int centerX = WIDTH / 2;
+        int centerY = HEIGHT / 2;
+
+        for (int i = 0; i < RINGS; i++) {
+            double angleOffset = rotation + i * Math.PI / 6; // offset each ring
+            int radius = RADIUS_STEP * (i + 1);
+
+            for (int j = 0; j < 12; j++) {
+                double angle = j * Math.PI / 6 + angleOffset;
+                int x = centerX + (int) (radius * Math.cos(angle));
+                int y = centerY + (int) (radius * Math.sin(angle));
+
+                // Alternate black and white circles
+                if ((i + j) % 2 == 0) g2d.setColor(Color.BLACK);
+                else g2d.setColor(Color.DARK_GRAY);
+
+                g2d.fillOval(x - 10, y - 10, 20, 20);
+            }
+        }
+
+        // Label
+        g2d.setColor(Color.RED);
+        g2d.drawString("Optical Illusion - Made by ScriptCookie", 10, 20);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        rotation += 0.02; // change rotation speed for illusion
+        repaint();
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Optical Illusion");
+        OpticalIllusion illusion = new OpticalIllusion();
+        frame.add(illusion);
+        frame.pack();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+}
