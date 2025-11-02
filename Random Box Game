@@ -1,0 +1,136 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Random;
+
+public class InteractivePlayground extends JPanel implements ActionListener, KeyListener {
+
+    private javax.swing.Timer timer;
+    private ArrayList<Particle> particles = new ArrayList<>();
+    private Random random = new Random();
+
+    private int playerX = 400, playerY = 300;
+    private int playerWidth = 50, playerHeight = 50;
+    private int playerSpeed = 5;
+    private boolean up, down, left, right;
+    private boolean shooting = false;
+
+    public InteractivePlayground() {
+        setPreferredSize(new Dimension(900, 600));
+        setBackground(Color.BLACK);
+
+        // Use javax.swing.Timer
+        timer = new javax.swing.Timer(16, this); // ~60 FPS
+        timer.start();
+
+        addKeyListener(this);
+        setFocusable(true);
+
+        // Spawn some particles initially
+        for (int i = 0; i < 100; i++) {
+            particles.add(new Particle(random.nextInt(900), random.nextInt(600)));
+        }
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        // Draw particles
+        for (Particle p : particles) {
+            g.setColor(p.color);
+            g.fillOval(p.x, p.y, p.size, p.size);
+        }
+
+        // Draw player
+        g.setColor(Color.CYAN);
+        g.fillRect(playerX, playerY, playerWidth, playerHeight);
+
+        // HUD
+        g.setColor(Color.WHITE);
+        g.drawString("Made by ScriptCookie", getWidth() - 160, 20);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        updatePlayer();
+        updateParticles();
+        repaint();
+    }
+
+    private void updatePlayer() {
+        if (up) playerY -= playerSpeed;
+        if (down) playerY += playerSpeed;
+        if (left) playerX -= playerSpeed;
+        if (right) playerX += playerSpeed;
+
+        // Boundaries
+        if (playerX < 0) playerX = 0;
+        if (playerY < 0) playerY = 0;
+        if (playerX > getWidth() - playerWidth) playerX = getWidth() - playerWidth;
+        if (playerY > getHeight() - playerHeight) playerY = getHeight() - playerHeight;
+
+        // Shoot
+        if (shooting) {
+            particles.add(new Particle(playerX + playerWidth / 2, playerY));
+            shooting = false; // Prevent holding down space
+        }
+    }
+
+    private void updateParticles() {
+        for (int i = 0; i < particles.size(); i++) {
+            Particle p = particles.get(i);
+            p.y -= p.speed; // move up
+            if (p.y < 0) particles.remove(i--);
+        }
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_W -> up = true;
+            case KeyEvent.VK_S -> down = true;
+            case KeyEvent.VK_A -> left = true;
+            case KeyEvent.VK_D -> right = true;
+            case KeyEvent.VK_SPACE -> shooting = true;
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_W -> up = false;
+            case KeyEvent.VK_S -> down = false;
+            case KeyEvent.VK_A -> left = false;
+            case KeyEvent.VK_D -> right = false;
+        }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {}
+
+    private static class Particle {
+        int x, y;
+        int size = 5;
+        int speed = 5;
+        Color color;
+
+        Particle(int x, int y) {
+            this.x = x;
+            this.y = y;
+            Random r = new Random();
+            color = new Color(r.nextInt(255), r.nextInt(255), r.nextInt(255));
+        }
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("ScriptCookie Interactive Playground");
+        InteractivePlayground panel = new InteractivePlayground();
+        frame.add(panel);
+        frame.pack();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+}
