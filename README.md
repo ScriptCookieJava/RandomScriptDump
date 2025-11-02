@@ -1,2 +1,1 @@
-# RandomScriptDump
-Random Scripts that do Random Things.
+In this Repository, there is a big dump of random scripts that can do anything. They are cool things to play around with. You may never know what to expect. Need to contact me? Email me at waffleguy145@gmail.com
